@@ -1,1 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal VB | Administração</title>
+<style>
+:root{--navy:#260747;--night:#35105e;--purple:#6d28d9;--pink:#c026d3;--bg:#f7f5fb;--line:#e8e0f0;--text:#29213a;--muted:#756b83}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px Arial,sans-serif}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+header{background:linear-gradient(115deg,var(--navy),var(--purple),var(--pink));color:white;padding:24px}
+.header-inner{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:15px}
+h1,h2,p{margin-top:0}
+h1{margin-bottom:5px;font-size:25px}
+header p{margin-bottom:0;color:#eee2ff}
+main{max-width:1100px;margin:28px auto;padding:0 16px 40px}
+.card{background:white;border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:20px;box-shadow:0 8px 25px #2607470b}
+.hidden{display:none!important}
+label{display:block;font-weight:700;font-size:13px;margin:13px 0 6px}
+input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--text)}
+textarea{min-height:150px;resize:vertical}
+button{border:0;border-radius:9px;padding:11px 15px;font-weight:700}
+.primary{background:linear-gradient(115deg,var(--purple),var(--pink));color:white}
+.secondary{background:#f0e8fa;color:var(--navy)}
+.danger{background:#fff0f1;color:#b4233b}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}
+.row button{flex:0 0 auto}
+.status{font-size:13px;line-height:1.5;color:var(--muted);margin-top:12px}
+.error{color:#b4233b}
+.success{color:#137547}
+.news-item{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px;display:flex;justify-content:space-between;gap:14px;align-items:center}
+.news-item h3{font-size:16px;margin:0 0 7px;overflow-wrap:anywhere}
+.news-item p{margin:0;color:var(--muted);font-size:12px}
+.news-actions{display:flex;gap:6px;flex-wrap:wrap}
+.news-actions button{padding:8px 10px;font-size:12px}
+#imagePreview{display:block;max-width:180px;max-height:130px;margin-top:10px;border-radius:9px}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:600px){header{padding:20px 16px}.header-inner{align-items:flex-start;flex-direction:column}main{margin-top:16px;padding:0 12px 30px}.card{padding:16px}.news-item{align-items:flex-start;flex-direction:column}.news-actions{width:100%}.news-actions button{flex:1}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>PORTAL VB <span style="font-weight:400">/ Administração</span></h1>
+      <p>Painel editorial · Várzea Branca e região</p>
+    </div>
+    <button id="logoutBtn" class="secondary hidden">Sair da conta</button>
+  </div>
+</header>
 
+<main>
+  <section id="loginCard" class="card">
+    <h2>Acesso administrativo</h2>
+    <p class="small">Entre com a conta autorizada no Firebase Authentication.</p>
+    <form id="loginForm">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="password">Senha</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <p id="loginMessage" class="status" role="status"></p>
+      <button class="primary" type="submit">Entrar no painel</button>
+    </form>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="card">
+      <div class="row">
+        <div>
+          <h2 id="formHeading">Nova notícia</h2>
+          <p class="small">Os campos com * são obrigatórios.</p>
+        </div>
+        <button id="newBtn" type="button" class="secondary">+ Nova notícia</button>
+      </div>
+
+      <form id="articleForm">
+        <input id="articleId" type="hidden">
+
+        <label for="title">Título da notícia *</label>
+        <input id="title" maxlength="180" required>
+
+        <label for="subtitle">Subtítulo / resumo</label>
+        <textarea id="subtitle" rows="2" style="min-height:75px"></textarea>
+
+        <div class="row">
+          <div>
+            <label for="category">Categoria</label>
+            <select id="category">
+              <option>Várzea Branca</option><option>Região</option>
+              <option>Eventos</option><option>Cultura</option>
+              <option>Política</option><option>Esportes</option>
+              <option>Entretenimento</option>
+            </select>
+          </div>
+          <div>
+            <label for="author">Autor</label>
+            <input id="author" value="Redação Portal VB">
+          </div>
+        </div>
+
+        <label for="body">Texto da notícia *</label>
+        <textarea id="body" required placeholder="Escreva a notícia completa..."></textarea>
+
+        <label for="imageFile">Imagem de capa (opcional)</label>
+        <input id="imageFile" type="file" accept="image/png,image/jpeg,image/webp">
+        <img id="imagePreview" class="hidden" alt="Prévia da imagem">
+        <p class="small">Use uma imagem de até 800 KB. Para esta primeira versão, ela será armazenada no registro da notícia.</p>
+        <label for="imageUrl">Ou endereço de uma imagem (opcional)</label>
+        <input id="imageUrl" type="url" placeholder="https://...">
+        <div class="row">
+          <div>
+            <label for="date">Data *</label>
+            <input id="date" type="date" required>
+          </div>
+          <div>
+            <label for="status">Situação</label>
+            <select id="status">
+              <option value="draft">Rascunho</option>
+              <option value="published">Publicar notícia</option>
+            </select>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:9px">
+          <input id="fitContain" type="checkbox" style="width:auto">
+          Mostrar a imagem inteira, sem cortes
+        </label>
+        <p id="formMessage" class="status" role="status"></p>
+        <div class="row">
+          <button class="primary" type="submit">Salvar notícia</button>
+          <button class="secondary" id="cancelBtn" type="button">Cancelar edição</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Notícias cadastradas</h2>
+      <input id="search" type="search" placeholder="Buscar por título ou categoria...">
+      <p id="listMessage" class="status" role="status"></p>
+      <div id="newsList"></div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js";
+import {
+  getDatabase, ref, get, set
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCkLLhG7DGa6HuR2HE6flaJeo7EOCl8pQ4",
+  authDomain: "portalvb-3e501.firebaseapp.com",
+  databaseURL: "https://portalvb-3e501-default-rtdb.firebaseio.com",
+  projectId: "portalvb-3e501",
+  storageBucket: "portalvb-3e501.firebasestorage.app",
+  messagingSenderId: "901028763176",
+  appId: "1:901028763176:web:9473ecf15266146133071d"
+};
+
+// O UID permitido também é verificado nas regras do banco.
+const ADMIN_UID = "KT2BuHfP9pWat1GwavqoLKFIRZ53";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+const $ = id => document.getElementById(id);
+
+let articles = [];
+let imageData = "";
+let signedInAdmin = false;
+
+function message(id, text, type = "") {
+  $(id).textContent = text;
+  $(id).className = "status " + type;
+}
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+function dateToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function showDashboard(yes) {
+  $("loginCard").classList.toggle("hidden", yes);
+  $("dashboard").classList.toggle("hidden", !yes);
+  $("logoutBtn").classList.toggle("hidden", !yes);
+}
+async function loadArticles() {
+  const snapshot = await get(ref(db, "articles"));
+  const data = snapshot.val();
+  articles = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+  articles = articles.filter(a => a && typeof a === "object");
+  renderList();
+}
+function renderList() {
+  const q = $("search").value.trim().toLocaleLowerCase("pt-BR");
+  const filtered = articles.filter(a =>
+    !a.trashed &&
+    (`${a.title || ""} ${a.category || ""}`.toLocaleLowerCase("pt-BR").includes(q))
+  ).sort((a,b) => (b.date || "").localeCompare(a.date || ""));
+
+  $("newsList").innerHTML = filtered.length ? filtered.map(a => `
+    <article class="news-item">
+      <div>
+        <h3>${escapeHTML(a.title || "Sem título")}</h3>
+        <p>${escapeHTML(a.category || "Sem categoria")} · ${escapeHTML(a.date || "Sem data")} · ${a.status === "published" ? "Publicada" : "Rascunho"}</p>
+      </div>
+      <div class="news-actions">
+        <button class="secondary" data-action="edit" data-id="${Number(a.id)}">Editar</button>
+        <button class="secondary" data-action="toggle" data-id="${Number(a.id)}">${a.status === "published" ? "Tornar rascunho" : "Publicar"}</button>
+        <button class="danger" data-action="delete" data-id="${Number(a.id)}">Excluir</button>
+      </div>
+    </article>`).join("") : '<p class="small">Nenhuma notícia encontrada.</p>';
+}
+function resetForm() {
+  $("articleForm").reset();
+  $("articleId").value = "";
+  $("formHeading").textContent = "Nova notícia";
+  $("date").value = dateToday();
+  $("author").value = "Redação Portal VB";
+  $("status").value = "draft";
+  imageData = "";
+  $("imagePreview").src = "";
+  $("imagePreview").classList.add("hidden");
+  message("formMessage", "");
+}
+function editArticle(id) {
+  const a = articles.find(x => Number(x.id) === id);
+  if (!a) return;
+  $("articleId").value = a.id;
+  $("title").value = a.title || "";
+  $("subtitle").value = a.subtitle || "";
+  $("category").value = a.category || "Várzea Branca";
+  $("author").value = a.author || "Redação Portal VB";
+  $("body").value = a.body || "";
+  $("date").value = a.date || dateToday();
+  $("status").value = a.status || "draft";
+  $("fitContain").checked = Boolean(a.fitContain);
+  imageData = a.image || "";
+  $("imageUrl").value = imageData.startsWith("data:") ? "" : imageData;
+  $("imagePreview").src = imageData;
+  $("imagePreview").classList.toggle("hidden", !imageData);
+  $("formHeading").textContent = "Editar notícia";
+  $("articleForm").scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function saveDatabase() {
+  if (!signedInAdmin || auth.currentUser?.uid !== ADMIN_UID) {
+    throw new Error("Sessão administrativa não autorizada.");
+  }
+  // Mantém o caminho e o formato de dados usados pelo portal público.
+  await set(ref(db, "articles"), articles);
+}
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  message("loginMessage", "Verificando acesso...");
+  try {
+    const result = await signInWithEmailAndPassword(auth, $("email").value.trim(), $("password").value);
+    if (result.user.uid !== ADMIN_UID) {
+      await signOut(auth);
+      message("loginMessage", "Esta conta não tem permissão administrativa.", "error");
+      return;
+    }
+    $("password").value = "";
+  } catch (err) {
+    message("loginMessage", "Não foi possível entrar. Confira o e-mail, a senha e a configuração do Firebase.", "error");
+  }
+});
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    signedInAdmin = false;
+    showDashboard(false);
+    return;
+  }
+  if (user.uid !== ADMIN_UID) {
+    await signOut(auth);
+    message("loginMessage", "Conta sem permissão administrativa.", "error");
+    return;
+  }
+  signedInAdmin = true;
+  showDashboard(true);
+  message("listMessage", "Carregando notícias...");
+  try {
+    await loadArticles();
+    message("listMessage", `${articles.length} notícia(s) carregada(s).`, "success");
+  } catch (err) {
+    message("listMessage", "Falha ao ler o banco. Confira as regras do Realtime Database.", "error");
+  }
+});
+$("logoutBtn").addEventListener("click", () => signOut(auth));
+$("newBtn").addEventListener("click", resetForm);
+$("cancelBtn").addEventListener("click", resetForm);
+$("search").addEventListener("input", renderList);
+$("imageFile").addEventListener("change", e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
+    message("formMessage", "Escolha uma imagem JPG, PNG ou WebP.", "error");
+    e.target.value = "";
+    return;
+  }
+  if (file.size > 800 * 1024) {
+    message("formMessage", "A imagem ultrapassa 800 KB. Reduza o tamanho antes de enviar.", "error");
+    e.target.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    imageData = String(reader.result);
+    $("imageUrl").value = "";
+    $("imagePreview").src = imageData;
+    $("imagePreview").classList.remove("hidden");
+    message("formMessage", "Imagem pronta para salvar.", "success");
+  };
+  reader.readAsDataURL(file);
+});
+$("imageUrl").addEventListener("input", () => {
+  if ($("imageUrl").value.trim()) {
+    imageData = $("imageUrl").value.trim();
+    $("imagePreview").src = imageData;
+    $("imagePreview").classList.remove("hidden");
+  }
+});
+$("articleForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!signedInAdmin || auth.currentUser?.uid !== ADMIN_UID) {
+    message("formMessage", "Sua sessão não está autorizada.", "error");
+    return;
+  }
+  const title = $("title").value.trim();
+  const body = $("body").value.trim();
+  if (!title || !body) {
+    message("formMessage", "Preencha o título e o texto da notícia.", "error");
+    return;
+  }
+  const oldId = $("articleId").value;
+  const id = oldId ? Number(oldId) : Date.now();
+  const old = articles.find(a => Number(a.id) === id);
+  let image = imageData || $("imageUrl").value.trim() || "";
+  if (image && !image.startsWith("data:image/")) {
+    try {
+      const url = new URL(image);
+      if (url.protocol !== "https:") throw new Error();
+    } catch {
+      message("formMessage", "Use um endereço de imagem HTTPS válido.", "error");
+      return;
+    }
+  }
+  const item = {
+    id, title, subtitle: $("subtitle").value.trim(),
+    category: $("category").value,
+    author: $("author").value.trim() || "Redação Portal VB",
+    body, date: $("date").value,
+    status: $("status").value,
+    image, fitContain: $("fitContain").checked,
+    trashed: old ? Boolean(old.trashed) : false
+  };
+  if (old) articles = articles.map(a => Number(a.id) === id ? item : a);
+  else articles.unshift(item);
+
+  message("formMessage", "Salvando notícia...");
+  try {
+    await saveDatabase();
+    resetForm();
+    renderList();
+    message("listMessage", "Notícia salva no Firebase.", "success");
+  } catch (err) {
+    message("formMessage", "Não foi possível salvar. Confira as regras do banco e tente novamente.", "error");
+    try { await loadArticles(); } catch {}
+  }
+});
+$("newsList").addEventListener("click", async e => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const id = Number(btn.dataset.id);
+  const article = articles.find(a => Number(a.id) === id);
+  if (!article) return;
+  if (btn.dataset.action === "edit") {
+    editArticle(id);
+    return;
+  }
+  if (btn.dataset.action === "delete" && !confirm("Excluir esta notícia permanentemente?")) return;
+  try {
+    if (btn.dataset.action === "delete") {
+      articles = articles.filter(a => Number(a.id) !== id);
+    } else if (btn.dataset.action === "toggle") {
+      article.status = article.status === "published" ? "draft" : "published";
+    }
+    await saveDatabase();
+    renderList();
+    message("listMessage", "Alteração salva.", "success");
+  } catch {
+    message("listMessage", "Não foi possível salvar. Verifique sua sessão e as regras do banco.", "error");
+    try { await loadArticles(); } catch {}
+  }
+});
+resetForm();
+</script>
+</body>
+          </html>
